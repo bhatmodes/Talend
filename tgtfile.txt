@@ -1,0 +1,1 @@
+{"args":{},"headers":{"Accept":"text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2","Cache-Control":"no-cache","Connection":"close","Host":"httpbin.org","Pragma":"no-cache","User-Agent":"Java/1.8.0_131"},"origin":"202.59.231.33","url":"http://httpbin.org/get"}
