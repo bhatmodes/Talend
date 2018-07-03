@@ -11,6 +11,7 @@
   <modules>
     <module>code/routines</module>
     <module>jobs/process/Atria/atria_0.1</module>
+    <module>jobs/process/cuna_commissions_1.0</module>
   </modules>
   <properties>
     <talend.project.name>TALEND</talend.project.name>

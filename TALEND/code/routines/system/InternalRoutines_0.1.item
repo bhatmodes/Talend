@@ -1,0 +1,1616 @@
+package routines;
+
+import java.sql.*;
+import java.math.BigDecimal;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.io.IOException;
+import java.nio.file.*;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
+
+import routines.system.JSONArray;
+import routines.system.JSONObject;
+
+public class InternalRoutines {
+	public  static final int idColumn                                     = 1;
+	public  static final String idName                                    = "id";
+	public  static final String nameRegex                                 = "^[\"']?[A-Z](\\.|\\.[A-Z]\\.|[A-Aa-z]*'[A-Za-z]+|[-A-Za-z]+)[\"']?,?$";
+	
+	// Normalized File Definitions
+	public  static final String normalizedHeader                          = "Account Number,Rep Code,Commission Amount,Security ID Type,Symbol,CUSIP,Alternate Security ID,Security Description,Product Code,Source Rep Code,Rep Name,Account Owner First Name,Account Owner Middle Name,Account Owner Last Name,Account Registration Address,Transaction,Transaction Quantity,Share Price,Transaction Type,Cancel Transaction Flag,Broker/Dealer ID,Broker/Dealer Name,branch_number,Ticket Charge,Service Fee,Total Fees,Original Amount,Renewal Amount,Commission Rate,Commission Type,Commission Subtype,Tax ID,Fund Number,Processed on Date,Transaction Date,Settlement Date,Period End Date,Opened on Date,Terminated on Date\r\n";
+
+	// SSH definitions
+	public  static final String cfsExecuteUniData                         = "/home/depositor/bin/execute_unidata_command.sh";
+	public  static final String cfsExecuteUniDataNoWait                   = "/home/depositor/bin/no_wait_execute_unidata_command.sh";
+	public  static final String cfsProcessDepositFile                     = "PH_CT_PROCESS_DEPOSIT_FILE";
+	public  static final String cfsProcessQueuedFile                      = "BKGD_CT_PROCESS_DEPOSIT_FILE";
+	public  static final String cfsGetRepsForAccounts                     = "PH_CT_GET_ACCOUNT_REPS";
+	public  static final String cfsGetRepMappings                         = "PH_CT_GET_REP_MAPPINGS";
+	public  static final String cfsDeleteDepositRecords                   = "PH_CT_DELETE_DEPOSIT_RECORDS";
+	public  static final String cfsSshHost                                = "cfs-day-old.private.orcasnet.com";
+	public  static final String cfsSshUsername                            = "depositor";
+	public  static final String cfsSshPassword                            = "hllywd38";
+	public  static final String cfsBackOfficeUsername                     = "download";
+	public  static final String cfsBackOfficePassword                     = "hllywd38";
+	public  static final String cfsBackOfficeDirectory                    = "/raid/live/data/cuso";
+	public  static final String cfsFrontOfficeDirectory                   = "/raid/live/data/cfs_clients";
+	public  static final String cfsUploadDirectory                        = "UPLOAD";
+	public  static final String cfsDefaultBank                            = "UNION";
+
+	public  static final String spfExecuteUniData                         = "/home/depositor/bin/execute_unidata_command.sh";
+	public  static final String spfExecuteUniDataNoWait                   = "/home/depositor/bin/no_wait_execute_unidata_command.sh";
+	public  static final String spfProcessDepositFile                     = "PH_CT_PROCESS_DEPOSIT_FILE";
+	public  static final String spfProcessQueuedFile                      = "BKGD_CT_PROCESS_DEPOSIT_FILE";
+	public  static final String spfGetRepsForAccounts                     = "PH_CT_GET_ACCOUNT_REPS";
+	public  static final String spfGetRepMappings                         = "PH_CT_GET_REP_MAPPINGS";
+	public  static final String spfDeleteDepositRecords                   = "PH_CT_DELETE_DEPOSIT_RECORDS";
+	public  static final String spfSshHost                                = "cfs-day-old.private.orcasnet.com";
+	public  static final String spfSshUsername                            = "depositor";
+	public  static final String spfSshPassword                            = "hllywd38";
+	public  static final String spfBackOfficeUsername                     = "download";
+	public  static final String spfBackOfficePassword                     = "hllywd38";
+	public  static final String spfBackOfficeDirectory                    = "/raid/live/data/spf";
+	public  static final String spfFrontOfficeDirectory                   = "/raid/live/data/spf_clients";
+	public  static final String spfUploadDirectory                        = "UPLOAD";
+	public  static final String spfDefaultBank                            = "UBCKG";
+
+	// User Summed Values Columns
+	public  static final int    amountColumn                              = 0;
+	public  static final String amountName                                = "amount";
+	public  static final int    creditsColumn                             = 1;
+	public  static final String creditsName                               = "credits";
+	public  static final int    debitsColumn                              = 2;
+	public  static final String debitsName                                = "debits";
+	public  static final int    countColumn                               = 3;
+	public  static final String countName                                 = "count";
+	public  static final int    creditCountColumn                         = 4;
+	public  static final String creditCountName                           = "creditCount";
+	public  static final int    debitCountColumn                          = 5;
+	public  static final String debitCountName                            = "debitCount";
+
+	// Result Array definitions from setupCommission
+	public  static final int    sessionSponsorId                          = 0;
+	public  static final int    sessionUserId                             = 1;
+	public  static final int    sessionDataFileId                         = 2;
+	public  static final int    sessionCommissionUploadId                 = 3;
+	public  static final int    sessionCommissionEntryId                  = 4;
+	public  static final int    sessionFilename                           = 5;
+	public  static final int    sessionXtivaAccountFilename               = 6;
+	public  static final int    sessionXtivaTransactionsFilename          = 7;	
+	public  static final int    sessionOutputFolder                       = 8;
+
+	// User Record Columns
+	public  static final int    userEmailColumn                           = 2;
+	public  static final String userEmailName                             = "email";
+	public  static final int    userPasswordColumn                        = 3;
+	public  static final String userPasswordName                          = "password";
+	public  static final int    userTimeZoneColumn                        = 4;
+	public  static final String userTimeZoneName                          = "timeZone";
+	public  static final int    userFirstNameColumn                       = 5;
+	public  static final String userFirstNameName                         = "firstName";
+	public  static final int    userLastNameColumn                        = 6;
+	public  static final String userLastNameName                          = "lastName";
+	public  static final int    userEnabledColumn                         = 7;
+	public  static final String userEnabledName                           = "enabled";
+	public  static final int    userSuperuserColumn                       = 8;
+	public  static final String userSuperuserName                         = "superuser";
+	public  static final int    userClassicUserIdColumn                   = 9;
+	public  static final String userClassicUserIdName                     = "classicUserId";
+	public  static final int    userBecomeUserIdColumn                    = 10;
+	public  static final String userBecomeUserIdName                      = "becomeUserId";
+	public  static final int    userBecameUserAtColumn                    = 11;
+	public  static final String userBecameUserAtName                      = "becameUserAt";
+
+	// Sponsor Record Name
+	public  static final int    sponsorDescriptionColumn                  = 2;
+	public  static final String sponsorDescriptionName                    = "description";
+	public  static final int    sponsorContactIdColumn                    = 3;
+	public  static final String sponsorContactIdName                      = "contactId";
+	public  static final int    sponsorBrokerDealerIdColumn               = 4;
+	public  static final String sponsorBrokerDealerIdName                 = "brokerDealerId";
+	public  static final int    sponsorClassicPrefixColumn                = 5;
+	public  static final String sponsorClassicPrefixName                  = "classicPrefix";
+	public  static final int    sponsorClassicCodeColumn                  = 6;
+	public  static final String sponsorClassicCodeName                    = "classicCode";
+	public  static final int    sponsorRep_codeMappingsIncludeRealmColumn = 7;
+	public  static final String sponsorRep_codeMappingsIncludeRealmName   = "rep_codeMappingsIncludeRealm";
+	public  static final int    sponsorProcessingFlagsColumn              = 8;
+	public  static final String sponsorProcessingFlagsName                = "processingFlags";
+
+	// Interpreter Record Name
+	public  static final int    interpreterInputMappingIdColumn           = 2;
+	public  static final String interpreterInputMappingIdName             = "inputMappingId";
+	public  static final int    interpreterOutputMappingIdColumn          = 3;
+	public  static final String interpreterOutputMappingIdName            = "outputMappingId";
+	public  static final int    interpreterShortNameColumn                = 4;
+	public  static final String interpreterShortNameName                  = "shortName";
+	public  static final int    interpreterDescriptionColumn              = 5;
+	public  static final String interpreterDescriptionName                = "description";
+
+    // DataFile Record Columns
+	public  static final int    dataFileMimeTypeIdColumn                  = 2;
+	public  static final String dataFileMimeTypeIdName                    = "fileMimeTypeId";
+	public  static final int    dataFileFilenameColumn                    = 3;
+	public  static final String dataFileFilenameName                      = "fileFilename";
+	public  static final int    dataFileCreationTimeColumn                = 4;
+	public  static final String dataFileCreationTimeName                  = "fileCreationTime";
+	public  static final int    dataFileDescriptionColumn                 = 5;
+	public  static final String dataFileDescriptionName                   = "fileDescription";
+	public  static final int    dataFileTextColumn                        = 6;
+	public  static final String dataFileTextName                          = "fileText";
+	public  static final int    dataFileDataColumn                        = 7;
+	public  static final String dataFileDataName                          = "fileData";
+
+	// CommissionEntry Record Columns
+	public  static final int    commissionEntrySponsorIdColumn            = 2;
+	public  static final String commissionEntrySponsorIdName              = "sponsorId";
+	public  static final int    commissionEntryUserIdColumn               = 3;
+	public  static final String commissionEntryUserIdName                 = "userId";
+	public  static final int    commissionEntryInterpreterIdColumn        = 4;
+	public  static final String commissionEntryInterpreterIdName          = "interpreterId";
+	public  static final int    commissionEntryDataFileIDColumn           = 5;
+	public  static final String commissionEntryDataFileIDName             = "dataFileID";
+	public  static final int    commissionEntryGrandTotalColumn           = 6;
+	public  static final String commissionEntryGrandTotalName             = "grandTotal";
+	public  static final int    commissionEntryTotalCreditsColumn         = 7;
+	public  static final String commissionEntryTotalCreditsName           = "totalCredits";
+	public  static final int    commissionEntryTotalDebitsColumn          = 8;
+	public  static final String commissionEntryTotalDebitsName            = "totalDebits";
+	public  static final int    commissionEntryTotalEntriesColumn         = 9;
+	public  static final String commissionEntryTotalEntriesName           = "totalEntries";
+	public  static final int    commissionEntryCreditEntriesColumn        = 10;
+	public  static final String commissionEntryCreditEntriesName          = "creditEntries";
+	public  static final int    commissionEntryDebitEntriesColumn         = 11;
+	public  static final String commissionEntryDebitEntriesName           = "debitEntries";
+	public  static final int    commissionEntryProcessedAtColumn          = 12;
+	public  static final String commissionEntryProcessedAtName            = "processedAt";
+	public  static final int    commissionEntryDescriptionColumn          = 13;
+	public  static final String commissionEntryDescriptionName            = "description";
+	public  static final int    commissionEntryStatusColumn               = 14;
+	public  static final String commissionEntryStatusName                 = "status";
+	public  static final int    commissionEntryFileDataSourceColumn       = 15;
+	public  static final String commissionEntryFileDataSourceName         = "fileDataSource";
+	public  static final int    commissionEntryFileRecordCountColumn      = 16;
+	public  static final String commissionEntryFileRecordCountName        = "fileRecordCount";
+	public  static final int    commissionEntrySessionColumn              = 17;
+	public  static final String commissionEntrySessionName                = "session";
+	public  static final int    commissionEntryBankColumn                 = 18;
+	public  static final String commissionEntryBankName                   = "bank";
+	public  static final int    commissionEntryCheckNumberColumn          = 19;
+	public  static final String commissionEntryCheckNumberName            = "checkNumber";
+	public  static final int    commissionEntryCheckAmountColumn          = 20;
+	public  static final String commissionEntryCheckAmountName            = "checkAmount";
+	public  static final int    commissionEntryCheckDateColumn            = 21;
+	public  static final String commissionEntryCheckDateName              = "checkDate";
+	public  static final int    commissionEntryFileDateColumn             = 22;
+	public  static final String commissionEntryFileDateName               = "fileDate";
+	public  static final int    commissionEntryDepositDateColumn          = 23;
+	public  static final String commissionEntryDepositDateName            = "depositDate";
+	public  static final int    commissionEntryUploadDateColumn           = 24;
+	public  static final String commissionEntryUploadDateName             = "uploadDate";
+	public  static final int    commissionEntryAccountingDateColumn       = 25;
+	public  static final String commissionEntryAccountingDateName         = "accountingDate";
+
+	// CommissionUpload Record Columns
+	public  static final int    commissionUploadUserIDColumn               = 2;
+	public  static final String commissionUploadUserIDName                 = "userID";
+	public  static final int    commissionUploadUploadDateColumn           = 3;
+	public  static final String commissionUploadUploadDateName             = "uploadDate";
+	public  static final int    commissionUploadCommissionEntryIdColumn    = 4;
+	public  static final String commissionUploadCommissionEntryIdName      = "commissionEntryId";
+	public  static final int    commissionUploadSessionColumn              = 5;
+	public  static final String commissionUploadSessionName                = "session";
+	public  static final int    commissionUploadDepositDateColumn          = 6;
+	public  static final String commissionUploadDepositDateName            = "depositDate";
+	public  static final int    commissionUploadAccountingDateColumn       = 7;
+	public  static final String commissionUploadAccountingDateName         = "accountingDate";
+	public  static final int    commissionUploadSponsorColumn              = 8;
+	public  static final String commissionUploadSponsorName                = "sponsor";
+	public  static final int    commissionUploadBankColumn                 = 9;
+	public  static final String commissionUploadBankName                   = "bank";
+	public  static final int    commissionUploadFilenameColumn             = 10;
+	public  static final String commissionUploadFilenameName               = "filename";
+	public  static final int    commissionUploadGrandTotalColumn           = 11;
+	public  static final String commissionUploadGrandTotalName             = "grandTotal";
+	public  static final int    commissionUploadCheckAmountColumn          = 12;
+	public  static final String commissionUploadCheckAmountName            = "checkAmount";
+	public  static final int    commissionUploadStatusColumn               = 13;
+	public  static final String commissionUploadStatusName                 = "status";
+	public  static final int    commissionUploadErrorMessageColumn         = 14;
+	public  static final String commissionUploadErrorMessageName           = "errorMessage";
+	public  static final int    commissionUploadJobIdColumn                = 15;
+	public  static final String commissionUploadJobIdName                  = "jobId";
+
+    private static final String developmentDbUrl      = "jdbc:postgresql://localhost";
+	private static final String developmentDbUser     = "talend";
+	private static final String developmentDbPassword = "talend";
+	public enum NameWanted {
+			ORIGINAL,
+			FULL_NAME,
+			LAST_NAME,
+			FIRST_NAME,
+			MIDDLE_NAME,
+			FIRST_AND_LAST_NAME,
+			NICKNAME,
+			COHOLDER_FULL_NAME,
+			COHOLDER_LAST_NAME,
+			COHOLDER_FIRST_NAME,
+			COHOLDER_MIDDLE_NAME,
+			COHOLDER_FIRST_AND_LAST_NAME,
+			COHOLDER_NICKNAME
+	}
+
+    public static String safeTrim(String trimString) {
+		String result = trimString;
+
+		if (trimString != null)
+			result = trimString.trim();
+
+		return result;
+    }
+
+    public static int regexIndexOf(String searchString, String patternStr) {
+		int result      = -1;
+
+		if (searchString != null && patternStr != null) {
+			Pattern pattern = Pattern.compile(patternStr);
+			Matcher matcher = pattern.matcher(searchString);
+
+			 if (matcher.find()) {
+				result = matcher.start();
+			 }
+		}
+
+		return result;
+    }
+
+    public static String getMatchingGroup(String searchString,
+										  String patternStr,
+										  int    groupNumber) {
+		String result = null;
+
+		if (searchString != null && patternStr != null) {
+			Pattern pattern = Pattern.compile(patternStr);
+			Matcher matcher = pattern.matcher(searchString);
+			boolean matched = matcher.find();
+
+			if (matched) {
+				int groupCount =  matcher.groupCount();
+
+				if (groupNumber <= groupCount) 
+					result = matcher.group(groupNumber);
+			}
+		}
+
+		return result;
+    }
+
+	public static String readAllBytes(String filePath) throws IOException
+	{
+		String content = "";
+		try
+		{
+			content = new String(Files.readAllBytes(Paths.get(filePath)));
+		}
+		catch (IOException e)
+		{
+			throw e;
+		}
+		return content;
+	}
+
+    public static boolean isStreet(String text) {
+		String  line   = text.trim();
+    		boolean result = ((regexIndexOf(line, "[Bb][Oo][Xx]\\s+\\d+")                          >= 0) ||
+    						  (regexIndexOf(line, "[Aa][Pp][Tt]\\.?\\s+#?[0-9A-Za-z]+")            >= 0) ||
+    						  (regexIndexOf(line, "^[Uu][Ss][Cc][Gg][Cc]\\s+[A-Za-z]+")            >= 0) ||
+    						  (regexIndexOf(line, "^[Cc][Mm][Rr]\\s+\\d+"             )            >= 0) ||
+    						  (regexIndexOf(line, "^\\d+\\s+[0-9]*[A-Za-z.]+\\s+[0-9]*[A-Za-z.]+") >= 0));
+
+    		return result;
+    }
+
+    public static boolean isCityStateZip(String text) {
+    		String  line   = text.trim();
+		boolean result = (line.matches("^[^,]+,?\\s+[A-Za-z]{2},?\\s+\\d{5}(?:[-\\s]\\d{4})?$") ||
+						  line.matches("^[^,]+,?\\s+[^,]+,?\\s+\\d{5}(?:[-\\s]\\d{4})?$")       ||
+						  (regexIndexOf(line, "[^,]+,?\\s+[^,]+,?\\s+\\d{5}(?:[-\\s]\\d{4})?")  >= 0));
+
+		return result;
+    }
+
+    /*
+	    Method:      parseCityStateZip
+	    Parameters:  text a Strings, the registration line to parse.
+	    Return:      A String array containing the city, state and zip information.
+	    Description: Parses a line and returns it in an array.
+	    Calls:       parse_name
+	    Notes:       The Array is a follows (all values are strings):
+	                    result[0] - City
+	                    result[1] - State
+	                    result[2] - Zip
+	    # History:     06-21-2018 - First Written
+    */
+
+    public static String [] parseCityStateZip(String text) {
+		String line     = text.trim();
+		String[] result = { null, null, null };
+
+		if (line.matches("^([^,]+),?\\s+([A-Za-z]{2}),?\\s+(\\d{5}(?:[-\\s]\\d{4})?)$")) {
+			for (int i = 0; i < 3; i++)
+				result[i] = getMatchingGroup(line, "^([^,]+),?\\s+([A-Za-z]{2}),?\\s+(\\d{5}(?:[-\\s]\\d{4})?)$", (i + 1));
+		} else if (line.matches("^([^,]+),?\\s+([^,]+),?\\s+(\\d{5}(?:[-\\s]\\d{4})?)$")) {
+			for (int i = 0; i < 3; i++)
+				result[i] = getMatchingGroup(line, "^([^,]+),?\\s+([^,]+),?\\s+(\\d{5}(?:[-\\s]\\d{4})?)$", (i + 1));
+		} else if (line.matches("^([^,]+),?\\s+([^,]+),?\\s+(.+)$")) {
+			for (int i = 0; i < 3; i++)
+				result[i] = getMatchingGroup(line, "^([^,]+),?\\s+([^,]+),?\\s+(.+)$", (i + 1));
+		} else {
+			String [] fields = line.split("\\s+");
+			int       count  = fields.length;
+
+			if (fields.length >= 3) {
+				result[2] = fields[(count--) - 1];
+				result[1] = fields[count - 1];
+
+				for (int i = 0; i < count; i++) {
+					if (result[0] == null)
+						result[0] = fields[i];
+					else
+						result[0] += " " + fields[i];
+				}
+			}
+		}
+
+		return result;
+    }
+
+    public static boolean isName(String text) {
+		boolean result = (!isStreet(text) && !isCityStateZip(text));
+
+		if (result) {
+			String  line = text.trim();
+
+			if (line.indexOf(" ") < 0) {
+				result = line.matches(nameRegex);
+			} else {
+				String [] fields = line.split("\\s+");
+
+				for (int i = 0; i < fields.length; i++) {
+					result = fields[i].matches(nameRegex);
+
+					if (!result) {
+						result = (fields[i].matches("^\\d+(st|nd|rd|th)$") || fields[i].matches("^[A-za-z]+,$"));
+
+						if (!result)
+							result = (fields[i] == "&");
+
+						if (!result)
+							break;
+					}
+				}
+			}
+		}
+
+		return result;
+    }
+ 
+	/*
+	    Method:      parseName
+	    Parameters:  name a string, the name to parse;
+	                 wanted an optional sym (default: original), the name wanted:
+	                     ORIGINAL
+	                     FULL_NAME
+	                     LAST_NAME
+	                     FIRST_NAME
+	                     MIDDLE_NAME
+	                     FIRST_AND_LAST_NAME
+	                     NICKNAME
+	                     COHOLDER_FULL_NAME
+	                     COHOLDER_LAST_NAME
+	                     COHOLDER_FIRST_NAME
+	                     COHOLDER_MIDDLE_NAME
+	                     COHOLDER_FIRST_AND_LAST_NAME
+	                     COHOLDER_NICKNAME
+	    Return:      A string the name or empty string if there is none.
+	    Description: Parses a name and returns it.
+	    Calls:       None
+	    Notes:       Formats Handled: Last, First [Middle] or First [Middle] Last
+	    History:     05-29-2018 - First Written
+	*/
+
+    public static String parseName(String     name,
+						    		   NameWanted typeWanted,
+								   boolean    reversed) {
+	    String result          = null;
+		String firstName       = null;
+		String middleName      = null;
+		String lastName        = null;
+		String nickName        = null;
+		String originalName    = name;
+		NameWanted wanted      = typeWanted;
+	
+	    if (name == null) {
+			return result;
+	    }
+	
+		if (regexIndexOf(name, "(?i)\\s+(&|and)\\s+") >= 0) {
+			String[] names     = name.split("(?i)\\s+(&|and)\\s+");
+	
+			switch(wanted) {
+			  case COHOLDER_FULL_NAME:
+					wanted     = NameWanted.FULL_NAME;
+					name       = names[1];
+					break;
+	
+			  case COHOLDER_LAST_NAME:
+					wanted     = NameWanted.LAST_NAME;
+					name       = names[1];
+					break;
+	
+			  case COHOLDER_FIRST_NAME:
+					wanted     = NameWanted.FIRST_NAME;
+					name       = names[1];
+					break;
+	
+			  case COHOLDER_MIDDLE_NAME:
+					wanted     = NameWanted.MIDDLE_NAME;
+					name       = names[1];
+					break;
+	
+			  case COHOLDER_FIRST_AND_LAST_NAME:
+					wanted     = NameWanted.FIRST_AND_LAST_NAME;
+					name       = names[1];
+					break;
+	
+			  case COHOLDER_NICKNAME:
+					wanted     = NameWanted.NICKNAME;
+					name       = names[1];
+					break;
+	
+			  default:
+					name       = names[0];
+					break;
+			}
+		} else {
+			  switch (wanted) {
+				case COHOLDER_FULL_NAME:
+				case COHOLDER_LAST_NAME:
+				case COHOLDER_FIRST_NAME:
+				case COHOLDER_MIDDLE_NAME:
+				case COHOLDER_FIRST_AND_LAST_NAME:
+				case COHOLDER_NICKNAME:
+					  return result;
+			  }
+		}
+	
+		if (regexIndexOf(name, "(\"[-'a-zA-Z. ]+\")") >= 0) {
+			nickName           = safeTrim(getMatchingGroup(name, "(\"[-'a-zA-Z. ]+\")", 1));
+	
+			name               = safeTrim(name.replaceAll(Pattern.quote(nickName), " "));
+		 } else if (regexIndexOf(name, "('[-a-zA-Z. ]+')") >= 0) {
+			 nickName          = safeTrim(getMatchingGroup(name, "('[-a-zA-Z. ]+')", 1));
+	
+			name               = safeTrim(name.replaceAll(Pattern.quote(nickName), " "));
+		}
+	
+		name                   = name.replaceAll("\\ \\ +", " ");
+		int commaPosition      = name.indexOf(",");
+	
+		if ((commaPosition != -1) && !reversed) {
+			lastName           = name.substring(0, commaPosition);
+			firstName          = name.substring(commaPosition + 1);
+			String[] fields    = firstName.split("\\s+");
+	
+			if (fields.length > 1) {
+				middleName     = safeTrim(fields[fields.length - 1]);
+				firstName      = "";
+	
+				for (int i = 0; i < fields.length - 1; i++) {
+					if (firstName != "")
+						firstName += " ";
+	
+					firstName     += fields[i];
+				}
+			}
+		} else {
+			String[] names = { "", null };
+			int      i;
+	
+			firstName          = "";
+
+			if (reversed) {
+				String[] fields    = name.split(",");
+				lastName           = safeTrim(fields[0]);
+	
+				for (i = 1; i < fields.length; i++) {
+					if (firstName.length() > 0)
+						firstName += " ";
+	
+					firstName     += fields[i];
+				}
+			} else {
+				String[] fields    = name.split(" ");
+				lastName           = safeTrim(fields[fields.length - 1]);
+	
+				for (i = 0; i < (fields.length - 1); i++) {
+					if (firstName.length() > 0)
+						firstName += " ";
+	
+					firstName     += fields[i];
+				}
+			}
+	
+			names[1]          = safeTrim(firstName);
+	
+			if (regexIndexOf(names[1], "^(.+)\\s+(.+)$") >= 0) {
+				firstName  = safeTrim(getMatchingGroup(names[1], "^(.+)\\s+(.+)$", 1));
+				middleName = safeTrim(getMatchingGroup(names[1], "^(.+)\\s+(.+)$", 2));
+			} else {
+				firstName  = safeTrim(names[1]);
+			}
+		}
+	
+		switch(wanted) {
+			case ORIGINAL:
+				result         = originalName;
+	
+				break;
+	
+			case NICKNAME:
+				result         = nickName;
+	
+				break;
+			
+			case FIRST_AND_LAST_NAME:
+				if (middleName != null && (regexIndexOf(firstName , "^[A-Za-z]\\.$") >= 0)) { // Handle names like C. Thomas Howell
+					firstName  = middleName;
+					middleName = null;
+				}
+	
+				if (firstName != null && lastName != null) {
+					result     = firstName + " " + lastName;
+				} else if (lastName != null) {
+					result     = lastName;
+				} else if (firstName != null) {
+					result     = firstName;
+				}
+	
+				break;
+			
+			case FIRST_NAME:
+				if (middleName != null && (regexIndexOf(firstName , "^[A-Za-z]\\.$") >= 0)) { // Handle names like C. Thomas Howell
+					firstName  = middleName;
+					middleName = null;
+				}
+	
+				result         = firstName;
+	
+				break;
+	
+			case MIDDLE_NAME:
+				if (middleName != null && (regexIndexOf(firstName , "^[A-Za-z]\\.$") >= 0)) { // Handle names like C. Thomas Howell
+					firstName  = middleName;
+					middleName = null;
+				}
+	
+				result         = middleName;
+	
+				break;
+			case LAST_NAME:
+				result       = lastName;
+	
+				break;
+			default:
+				if (firstName != null && middleName != null && lastName!= null) {
+					result     = firstName + " " + middleName + " "  + lastName;
+				} else if (firstName != null && lastName != null) {
+					result     = firstName + " " + lastName;
+				} else if (lastName != null) {
+					result     = lastName;
+				} else if (firstName != null) {
+					result     = firstName;
+				}
+	
+				break;
+		}
+	
+	    return result;
+	}
+
+	public static String parseName(String parseName) {
+		return parseName(parseName, NameWanted.ORIGINAL, false);
+	}
+	
+	public static String parseName(String parseName, boolean reverse) {
+		return parseName(parseName, NameWanted.ORIGINAL, reverse);
+	}
+	
+	public static String parseName(String parseName, NameWanted wanted) {
+		return parseName(parseName, wanted, false);
+	}
+
+	public static String [] breakLine(String line, int breakAt, int maxLines) {
+		ArrayList<String> lines = new ArrayList<String>();
+
+		if (line == null) {
+			lines.add("");
+		} else if (breakAt <= 0) {
+			lines.add(line);
+		} else {
+			String  pattern      = "(.{1," + breakAt + "}(?:\\s|$))|(.{0," + breakAt + "})";
+			Pattern regex        = Pattern.compile(pattern, Pattern.DOTALL);
+			Matcher regexMatcher = regex.matcher(line);
+			int     index        = 0;
+
+			while (regexMatcher.find()) {
+				String text        = regexMatcher.group();
+
+				if (text.length() > 0) {
+					index       += 1;
+
+					lines.add(regexMatcher.group());
+
+					if ((maxLines > 0) && (index >= maxLines))
+						break;
+				}
+			}
+		}
+
+		if (lines.size() == 0) {
+			String [] result = new String[1];
+
+			return result;
+		} else {
+			String [] result = new String[lines.size()];
+
+			for (int i = 0; i < lines.size(); i++) {
+				result[i] = lines.get(i);
+			}
+
+			return result;
+		}
+	}
+
+    /*
+	    Method:      parseRegistration
+	    Parameters:  registration an array of strings, the registration to parse;
+	                 breakAt an int, the number of characters to break the street address at (if zero don't break);
+	                 maxLines an int, the maximum number of street lines if (breakAt is not zero; if maxLines is zero there is no limit).
+					 globalMap a java.util.Map<String, Object>, the global map, if null don't save the varables in the global Map.
+	    Return:      A String array containing the registration information.
+	    Description: Parses a registration and returns it in an array.
+	    Calls:       parseName, breakLine
+	    Notes:       The Array is a follows (all values are strings):
+	                    result[0]    - The first name.
+	                    result[1]    - The middle name.
+	                    result[2]    - The last name.
+	                    result[3]    - The Full Registration name.
+	                    result[4]    - The street address (may contain newlines).
+	                    result[5]    - The city.
+	                    result[6]    - The state.
+	                    result[7]    - The zip code.
+	                    result[8]    - The country code.
+	                    result[9..n] - The Address lines if breakAt is set.
+	    # History:     06-21-2018 - First Written
+	*/
+
+	public static String [] parseRegistration(String[] registration, int breakAt, int maxLines, java.util.Map<String, Object> globalMap) {
+		String [] result           = new String[10];
+    		String    name             = null;
+    		String    firstName        = null;
+    		String    middleName       = null;
+    		String    lastName         = null;
+    		String    street           = null;
+    		String [] multiLineStreet  = null;
+    		String    cityStateZip     = null;
+    		String    city             = null;
+    		String    state            = null;
+    		String    zip              = null;
+    		String    countryCode      = null;
+    		int       streetLine       = -1;
+    		int       cityStateZipLine = -1;
+
+    		if (globalMap != null) {
+	    		globalMap.put("registrationFirstName",       firstName);
+	    		globalMap.put("registrationLastName",        lastName);
+	    		globalMap.put("registrationMiddleName",      middleName);
+	    		globalMap.put("registrationName",            name);
+	    		globalMap.put("registrationStreet",          street);
+	    		globalMap.put("registrationMultilineStreet", multiLineStreet);
+	    		globalMap.put("registrationCity",            city);
+	    		globalMap.put("registrationState",           state);
+	    		globalMap.put("registrationZip",             zip);
+	    		globalMap.put("registrationCountryCode",     countryCode);
+    		}
+
+    		if (registration.length == 0)
+    			return result;
+
+    		for (int i = (registration.length - 1); i >= 0; i--) {
+    			if (isCityStateZip(registration[i])) {
+    				cityStateZipLine     = i;
+
+    				break;
+    			}
+    		}
+
+    		for (int i = 0; i < registration.length; i++) {
+    			if (isStreet(registration[i])) {
+    				streetLine           = i;
+
+    				break;
+    			}
+    		}
+
+    		if ((streetLine >= 0) && (cityStateZipLine >= 0)) {
+    			if (streetLine > 0) {
+    				for (int i = 0; (i < streetLine) && (i < registration.length); i++) {
+    					if (name == null)
+    						name         = registration[i];
+    					else
+    						name        += " " + registration[i];
+    				}
+
+    				for (int i = streetLine; (i < cityStateZipLine) && (i < registration.length); i++) {
+    					if (street == null)
+    						street       = registration[i];
+    					else
+    						street      += " " + registration[i];
+    				}
+    			}
+
+    			cityStateZip = registration[cityStateZipLine];
+
+    			for (int i = (cityStateZipLine + 1); (i < registration.length); i++) {
+				if (countryCode == null)
+					countryCode      = registration[i];
+				else
+					countryCode     += " " + registration[i];
+    			}
+		} else if ((streetLine >= 0) || (cityStateZipLine >= 0)) {
+			if (streetLine >= 0) {
+	    			if (streetLine > 0) {
+	    				for (int i = 0; (i < streetLine) && (i < registration.length); i++) {
+	    					if (name == null)
+	    						name     = registration[i];
+	    					else
+	    						name    += " " + registration[i];
+	    				}
+	
+	    				for (int i = streetLine; (i < cityStateZipLine) && (i < registration.length); i++) {
+	    					if (street == null)
+	    						street   = registration[i];
+	    					else
+	    						street  += " " + registration[i];
+	    				}
+	    			}
+			} else {
+	    			if (cityStateZipLine > 0) {
+	    				for (int i = 0; (i < cityStateZipLine) && (i < registration.length); i++) {
+	    					if (name == null)
+	    						name     = registration[i];
+	    					else
+	    						name    += " " + registration[i];
+	    				}
+	    			}
+
+	    			cityStateZip         = registration[cityStateZipLine];
+
+	    			for (int i = (cityStateZipLine + 1); (i < registration.length); i++) {
+					if (countryCode == null)
+						countryCode  = registration[i];
+					else
+						countryCode += " " + registration[i];
+	    			}
+			}
+		}
+		else {
+			for (int i = 0; i < registration.length; i++) {
+				if (name == null)
+					name             = registration[i];
+				else
+					name            += " " + registration[i];
+			}
+		}
+
+    		if (cityStateZip != null) {
+			String [] fields         = parseCityStateZip(registration[cityStateZipLine]);
+			city                     = fields[0];
+			state                    = fields[1];
+			zip                      = fields[2];
+    		}
+ 
+		if (name != null) {
+			firstName                = parseName(name, NameWanted.FIRST_NAME);
+			middleName               = parseName(name, NameWanted.MIDDLE_NAME);
+			lastName                 = parseName(name, NameWanted.LAST_NAME);
+		}
+
+		if (breakAt > 0) {
+			multiLineStreet          = breakLine(street, breakAt, maxLines);
+			result                   = new String[9 + multiLineStreet.length];
+		}
+
+		if (globalMap != null) {
+	    		globalMap.put("registrationFirstName",       firstName);
+	    		globalMap.put("registrationLastName",        lastName);
+	    		globalMap.put("registrationMiddleName",      middleName);
+	    		globalMap.put("registrationName",            name);
+	    		globalMap.put("registrationStreet",          street);
+	    		globalMap.put("registrationCity",            city);
+	    		globalMap.put("registrationState",           state);
+	    		globalMap.put("registrationZip",             zip);
+	    		globalMap.put("registrationCountryCode",     countryCode);
+	    		globalMap.put("registrationMultilineStreet", multiLineStreet);
+		}
+
+		result[0]                    = firstName;
+        result[1]                    = middleName;
+        result[2]                    = lastName;
+        result[3]                    = name;
+        result[4]                    = street;
+        result[5]                    = city;
+        result[6]                    = state;
+        result[7]                    = zip;
+        result[8]                    = countryCode;
+
+        if (multiLineStreet != null) {
+        		for (int i = 0; i < multiLineStreet.length; i++)
+        			result[9 + i]        = multiLineStreet[i];
+        }
+
+        return result;
+    }
+  
+	public static String [] parseRegistration(String registration, int breakAt, int maxLines, java.util.Map<String, Object> globalMap) {
+		String [] registrationArray = new String[1];
+
+		if (registration != null)
+			registrationArray = registration.split("\n");
+		else
+			registrationArray[0] = "";
+
+		return parseRegistration(registrationArray, breakAt, maxLines, globalMap);
+	}
+
+	public static HashMap<String, Object> getUser(String userEmail, java.sql.Connection databaseConnection) throws Exception {
+    	HashMap<String, Object> result = new HashMap<String, Object>(userBecameUserAtColumn);
+
+		try {
+			java.sql.Statement statement        = databaseConnection.createStatement();
+			ResultSet          resultSet        = statement.executeQuery("SELECT * from users WHERE email='" + userEmail +  "'");
+
+			while (resultSet.next()) {
+				result.put(idName,                resultSet.getInt(idColumn));
+				result.put(userEmailName,         resultSet.getString(userEmailColumn));
+				result.put(userPasswordName,      resultSet.getString(userPasswordColumn));
+				result.put(userTimeZoneName,      resultSet.getString(userTimeZoneColumn));
+				result.put(userFirstNameName,     resultSet.getString(userFirstNameColumn));
+				result.put(userLastNameName,      resultSet.getString(userLastNameColumn));
+				result.put(userEnabledName,       resultSet.getBoolean(userEnabledColumn));
+				result.put(userSuperuserName,     resultSet.getBoolean(userSuperuserColumn));
+				result.put(userClassicUserIdName, resultSet.getInt(userClassicUserIdColumn));
+				result.put(userBecomeUserIdName,  resultSet.getInt(userBecomeUserIdColumn));
+				result.put(userBecameUserAtName,  resultSet.getTimestamp(userBecameUserAtColumn));
+
+				break;
+			}
+		} catch (Exception e) {
+			throw e;
+		}
+
+		return result;
+	}
+
+    public static HashMap<String, Object> getSponsor(String sponsorDescription, java.sql.Connection databaseConnection) throws Exception {
+    	HashMap<String, Object> result = new HashMap<String, Object>(sponsorProcessingFlagsColumn);
+
+		try {
+			java.sql.Statement statement        = databaseConnection.createStatement();
+			ResultSet          resultSet        = statement.executeQuery("SELECT * from sponsors WHERE description='" + sponsorDescription +  "'");;
+
+			while (resultSet.next()) {
+				result.put(idName,                                  resultSet.getInt(idColumn));
+				result.put(sponsorDescriptionName,                  resultSet.getString(sponsorDescriptionColumn));
+				result.put(sponsorContactIdName,                    resultSet.getInt(sponsorContactIdColumn));
+				result.put(sponsorBrokerDealerIdName,               resultSet.getInt(sponsorBrokerDealerIdColumn));
+				result.put(sponsorClassicPrefixName,                resultSet.getString(sponsorClassicPrefixColumn));
+				result.put(sponsorClassicCodeName,                  resultSet.getString(sponsorClassicCodeColumn));
+				result.put(sponsorRep_codeMappingsIncludeRealmName, resultSet.getBoolean(sponsorRep_codeMappingsIncludeRealmColumn));
+				result.put(sponsorProcessingFlagsName,              resultSet.getInt(sponsorProcessingFlagsColumn));
+
+				break;
+			}
+		} catch (Exception e) {
+			throw e;
+		}
+
+		return result;
+	}
+
+    public static HashMap<String, Object> getInterpreter(String interpreterShortName, java.sql.Connection databaseConnection) throws Exception {
+    	HashMap<String, Object> result = new HashMap<String, Object>(sponsorProcessingFlagsColumn);
+
+		try {
+			java.sql.Statement statement        = databaseConnection.createStatement();
+			ResultSet          resultSet        = statement.executeQuery("SELECT * from interpreters WHERE short_name='" + interpreterShortName +  "'");;
+
+			while (resultSet.next()) {
+				result.put(idName,                         resultSet.getInt(idColumn));
+				result.put(interpreterInputMappingIdName,  resultSet.getInt(interpreterInputMappingIdColumn));
+				result.put(interpreterOutputMappingIdName, resultSet.getInt(interpreterOutputMappingIdColumn));
+				result.put(interpreterShortNameName,       resultSet.getString(interpreterShortNameColumn));
+				result.put(interpreterDescriptionName,     resultSet.getString(interpreterDescriptionColumn));
+
+				break;
+			}
+		} catch (Exception e) {
+			throw e;
+		}
+
+		return result;
+	}
+
+    public static HashMap<String, Object> createDataFile(String filename, java.sql.Connection databaseConnection) throws Exception {
+    	HashMap<String, Object> result            = new HashMap<String, Object>(dataFileDataColumn);
+		DateTimeFormatter       dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		LocalDateTime           now               = LocalDateTime.now();
+		Timestamp               created_at        = new Timestamp(System.currentTimeMillis());
+		String                  description       = filename + " downloaded on " + dateTimeFormatter.format(now) + ".";
+		String                  insertStatement   = "INSERT INTO data_files (filename, creation_time, description, text) VALUES (?,?,?,?) RETURNING *";
+
+		try {
+			PreparedStatement preparedStatement   = databaseConnection.prepareStatement(insertStatement);
+			
+			preparedStatement.setString(1, filename);
+			preparedStatement.setTimestamp(2, created_at);
+			preparedStatement.setString(3, description);
+			preparedStatement.setString(4, readAllBytes(filename));
+			preparedStatement.execute();
+
+			ResultSet resultSet                   = preparedStatement.getResultSet();
+
+			while (resultSet.next()) {
+				result.put(idName,                   resultSet.getInt(idColumn));
+				result.put(dataFileMimeTypeIdName,   resultSet.getString(dataFileMimeTypeIdColumn));
+				result.put(dataFileFilenameName,     resultSet.getString(dataFileFilenameColumn));
+				result.put(dataFileCreationTimeName, resultSet.getTimestamp(dataFileCreationTimeColumn));
+				result.put(dataFileDescriptionName,  resultSet.getString(dataFileDescriptionColumn));
+				result.put(dataFileTextName,         resultSet.getString(dataFileTextColumn));
+				result.put(dataFileDataName,         resultSet.getObject(dataFileDataColumn));
+
+				break;
+			}
+		} catch (Exception e) {
+			throw e;
+		}
+		
+		return result;
+    }
+
+    public static HashMap<String, Object> createCommissionUpload(int userId, Timestamp uploadDate, int commissionEntryId, String sponsorName, String filename, java.sql.Connection databaseConnection) throws Exception {
+    	HashMap<String, Object> result          = new HashMap<String, Object>(dataFileDataColumn);
+		String                  insertStatement = "INSERT INTO commission_uploads (user_id, upload_date, commission_entry_id, sponsor, filename) VALUES (?,?,?,?,?) RETURNING *";
+
+		try {
+			PreparedStatement preparedStatement = databaseConnection.prepareStatement(insertStatement);
+
+			preparedStatement.setInt(1,       userId);
+			preparedStatement.setTimestamp(2, uploadDate);
+			preparedStatement.setInt(3,       commissionEntryId);
+			preparedStatement.setString(4,    sponsorName);
+			preparedStatement.setString(5,    filename);
+			preparedStatement.execute();
+
+			ResultSet           resultSet       = preparedStatement.getResultSet();
+
+			while (resultSet.next()) {
+				result.put(idName,                                resultSet.getInt(idColumn));
+                result.put(commissionUploadUserIDName,            resultSet.getInt(commissionUploadUserIDColumn));
+                result.put(commissionUploadUploadDateName,        resultSet.getTimestamp(commissionUploadUploadDateColumn));
+                result.put(commissionUploadCommissionEntryIdName, resultSet.getString(commissionUploadCommissionEntryIdColumn));
+			    result.put(commissionUploadSessionName,           resultSet.getString(commissionUploadSessionColumn));
+			    result.put(commissionUploadDepositDateName,       resultSet.getDate(commissionUploadDepositDateColumn));
+			    result.put(commissionUploadAccountingDateName,    resultSet.getDate(commissionUploadAccountingDateColumn));
+			    result.put(commissionUploadSponsorName,           resultSet.getString(commissionUploadSponsorColumn));
+			    result.put(commissionUploadBankName,              resultSet.getString(commissionUploadBankColumn));
+			    result.put(commissionUploadFilenameName,          resultSet.getString(commissionUploadFilenameColumn));
+			    result.put(commissionUploadGrandTotalName,        resultSet.getBigDecimal(commissionUploadGrandTotalColumn));
+			    result.put(commissionUploadCheckAmountName,       resultSet.getBigDecimal(commissionUploadCheckAmountColumn));
+			    result.put(commissionUploadStatusName,            resultSet.getString(commissionUploadStatusColumn));
+			    result.put(commissionUploadErrorMessageName,      resultSet.getString(commissionUploadErrorMessageColumn));
+			    result.put(commissionUploadJobIdName,             resultSet.getString(commissionUploadJobIdColumn));
+
+				break;
+			}
+		} catch (Exception e) {
+			throw e;
+		}
+		
+		return result;
+    }
+
+    public static HashMap<String, Object> createCommissionEntry(int sponsorId, int interpreterId, int userId, int dataFileId, String description, Timestamp processed_at, java.sql.Connection databaseConnection) throws Exception {
+    	HashMap<String, Object> result = new HashMap<String, Object>(commissionEntryAccountingDateColumn);
+
+		try {
+			String                     insertStatement   = "INSERT INTO commission_entries (sponsor_id,interpreter_id,user_id,data_file_id,grand_total,total_credits,total_debits,total_entries,credit_entries,debit_entries,processed_at,description,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) RETURNING *";
+			java.sql.PreparedStatement preparedStatement = databaseConnection.prepareStatement(insertStatement);
+			BigDecimal                 zero              = new BigDecimal(0.0);
+
+			preparedStatement.setInt(1,        sponsorId);
+			preparedStatement.setInt(2,        interpreterId);
+			preparedStatement.setInt(3,        userId);
+			preparedStatement.setInt(4,        dataFileId);
+			preparedStatement.setBigDecimal(5, zero);
+			preparedStatement.setBigDecimal(6, zero);
+			preparedStatement.setBigDecimal(7, zero);
+			preparedStatement.setInt(8,        0);
+			preparedStatement.setInt(9,        0);
+			preparedStatement.setInt(10,       0);
+			preparedStatement.setTimestamp(11, processed_at);
+			preparedStatement.setString(12,    description);
+			preparedStatement.setString(13,    "Started Processing");
+			preparedStatement.execute();
+
+			ResultSet          resultSet                 = preparedStatement.getResultSet();
+
+			while (resultSet.next()) {
+				result.put(idName,                             resultSet.getInt(idColumn));
+				result.put(commissionEntrySponsorIdName,       resultSet.getInt(commissionEntrySponsorIdColumn));
+				result.put(commissionEntryUserIdName,          resultSet.getInt(commissionEntryUserIdColumn));
+				result.put(commissionEntryDataFileIDName,      resultSet.getInt(commissionEntryDataFileIDColumn));
+				result.put(commissionEntryGrandTotalName,      resultSet.getBigDecimal(commissionEntryGrandTotalColumn));
+				result.put(commissionEntryTotalCreditsName,    resultSet.getBigDecimal(commissionEntryTotalCreditsColumn));
+				result.put(commissionEntryTotalDebitsName,     resultSet.getBigDecimal(commissionEntryTotalDebitsColumn));
+				result.put(commissionEntryTotalEntriesName,    resultSet.getInt(commissionEntryTotalEntriesColumn));
+				result.put(commissionEntryCreditEntriesName,   resultSet.getInt(commissionEntryCreditEntriesColumn));
+				result.put(commissionEntryDebitEntriesName,    resultSet.getInt(commissionEntryDebitEntriesColumn));
+				result.put(commissionEntryProcessedAtName,     resultSet.getTimestamp(commissionEntryProcessedAtColumn));
+				result.put(commissionEntryDescriptionName,     resultSet.getString(commissionEntryDescriptionColumn));
+				result.put(commissionEntryStatusName,          resultSet.getString(commissionEntryStatusColumn));
+				result.put(commissionEntryFileDataSourceName,  resultSet.getString(commissionEntryFileDataSourceColumn));
+				result.put(commissionEntryFileRecordCountName, resultSet.getInt(commissionEntryFileRecordCountColumn));
+				result.put(commissionEntrySessionName,         resultSet.getString(commissionEntrySessionColumn));
+				result.put(commissionEntryBankName,            resultSet.getString(commissionEntryBankColumn));
+				result.put(commissionEntryCheckNumberName,     resultSet.getString(commissionEntryCheckNumberColumn));
+				result.put(commissionEntryCheckAmountName,     resultSet.getBigDecimal(commissionEntryCheckAmountColumn));
+				result.put(commissionEntryCheckDateName,       resultSet.getDate(commissionEntryCheckDateColumn));
+				result.put(commissionEntryFileDateName,        resultSet.getDate(commissionEntryFileDateColumn));
+				result.put(commissionEntryDepositDateName,     resultSet.getDate(commissionEntryDepositDateColumn));
+				result.put(commissionEntryUploadDateName,      resultSet.getDate(commissionEntryUploadDateColumn));
+				result.put(commissionEntryAccountingDateName,  resultSet.getDate(commissionEntryAccountingDateColumn));
+
+				break;
+			}
+		} catch (Exception e) {
+			throw e;
+		}
+
+		return result;
+	}
+
+
+	public static boolean addCustomRow(String filename, String row, boolean createFile, boolean deleteFileIfExists) throws Exception {
+		boolean result = false;
+		Path path      = Paths.get(filename);
+
+		if (createFile) {
+			if (deleteFileIfExists && Files.isRegularFile(path))
+				Files.delete(path);
+
+			if (!Files.isRegularFile(path))
+				Files.createFile(path);
+		}
+
+		Files.write(path, row.getBytes(), StandardOpenOption.APPEND);
+
+		return result;
+	}
+
+	public static boolean addCustomRow(String filename, String [] columns, String seperator, boolean createFile, boolean deleteFileIfExists) throws Exception {
+		String row = String.join(seperator, columns);
+
+		return addCustomRow(filename, row, createFile, deleteFileIfExists);
+	}
+
+	public static boolean addCustomRow(String filename, String [] columns, String seperator, boolean createFile) throws Exception {
+		String row = String.join(seperator, columns);
+
+		return addCustomRow(filename, row, createFile, false);
+	}
+
+	public static boolean addCustomRow(String filename, String [] columns, String seperator) throws Exception {
+		String row = String.join(seperator, columns);
+
+		return addCustomRow(filename, row, true, false);
+	}
+
+	public static boolean addCustomRow(String filename, String [] columns) throws Exception {
+		String row = String.join(",", columns);
+
+		return addCustomRow(filename, row, false, false);
+	}
+
+	public static boolean addCustomRow(String filename, String row, boolean createFile) throws Exception {
+		return addCustomRow(filename, row, createFile, false);
+	}
+
+	public static boolean addCustomRow(String filename, String row) throws Exception {
+		return addCustomRow(filename, row, false, false);
+	}
+
+	public static boolean addNormalizedHeader(String filename) throws Exception {
+		return addCustomRow(filename, normalizedHeader, true, true);
+	}
+
+	public static String baseName(String filename, String extension) {
+		String result       = null;
+
+		if (extension == null) {
+			if (regexIndexOf(filename, "^.+\\/([^/]+)$") >= 0)
+				result      = safeTrim(getMatchingGroup(filename, "^.+\\/([^/]+)$", 1));
+			else
+				result      = filename;
+		} else {
+			if (regexIndexOf(filename, "^.+\\/([^/.]+)\\.(.+)$") >= 0) {
+				String name = safeTrim(getMatchingGroup(filename, "^.+\\/([^/.]+)\\.(.+)$", 1));
+				String ext  = safeTrim(getMatchingGroup(filename, "^.+\\/([^/.]+)\\.(.+)$", 1));
+
+				if (ext == extension)
+					result = name;
+				else
+					result = null;
+			} else {
+				result      = filename;
+			}
+		}
+
+		return result;
+	}
+
+	public static String baseName(String filename) {
+		return baseName(filename, null);
+	}
+
+
+	public static Date getFileDateFromFilename(String filename, Date uploadDate) {
+		Date result = null;
+
+		if (regexIndexOf(filename, "^.+\\d{2}\\-\\d{2}\\-\\d{4}.+$") >= 0) {
+			String    fileDateString        = safeTrim(getMatchingGroup(filename, "^.+(\\d{2}\\-\\d{2}\\-\\d{4}).+$", 1));
+			String [] fields                = fileDateString.split("\\-");
+
+			result                        = java.sql.Date.valueOf(fields[2] + "-" + fields[0] + "-" + fields[1]);
+		} else if (regexIndexOf(filename, "^.+\\d{4}\\-\\d{2}\\-\\d{2}.+$") >= 0) {
+			String    fileDateString        = safeTrim(getMatchingGroup(filename, "^.+(\\d{4}\\-\\d{2}\\-\\d{2}).+$", 1));
+
+			result                        = java.sql.Date.valueOf(fileDateString);
+		} else if (regexIndexOf(filename, "^.+\\d{2}\\-\\d{2}\\-\\d{2}.+$") >= 0) {
+			String    fileDateString        = safeTrim(getMatchingGroup(filename, "^.+(\\d{2}\\-\\d{2}\\-\\d{2}).+$", 1));
+			String [] fields                = fileDateString.split("\\-");
+			int       firstNumber           = Integer.parseInt(fields[0]);
+
+			if (firstNumber > 12)
+				result                    = java.sql.Date.valueOf("20" + fields[0] + "-" + fields[1] + "-" + fields[2]);
+			else
+				result                    = java.sql.Date.valueOf("20" + fields[2] + "-" + fields[0] + "-" + fields[1]);
+		}
+
+		if (result == null)
+			result = uploadDate;
+
+		if (result == null)
+			result = new java.sql.Date(System.currentTimeMillis());
+
+		return result;
+	}
+
+	/*
+	 * setupCommission("cmgcfscommfileout-2018-03-16.csv",
+	 *                 "CUNA (CFS)",
+	 *                 "commissions@orcasnet.com",
+	 *                 (java.sql.Connection)(globalMap.get("conn_tPostgresqlConnection_1"));
+	 */
+
+    public static Object[] setupCommission(String              filename,
+    										  String              sponsorDescription,
+    										  String              interpreterShortName,
+									      String              userEmail,
+									      java.sql.Connection databaseConnection,
+									      String              outputFolder,
+									      Boolean             generateNormalizedHeader,
+									      Boolean             generateXtivaHeaders) throws Exception {
+    		Object []                result             = new Object[sessionOutputFolder + 1];
+		int                      sponsorId          = 0;
+		int                      interpreterId      = 0;
+		int                      userId             = 0;
+		int                      dataFileId         = 0;
+		int                      commissionUploadId = 0;
+		int                      commissionEntryId  = 0;
+		DateTimeFormatter        dateTimeFormatter  = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		LocalDateTime            now                = LocalDateTime.now();
+		String                   description        = filename + " downloaded on " + dateTimeFormatter.format(now) + ".";
+		String                   sponsorName        = null;
+		String                   realm              = null;
+		Timestamp                processed_at       = new Timestamp(System.currentTimeMillis());
+		HashMap<String, Object>  user               = getUser(userEmail, databaseConnection);
+		HashMap<String, Object>  sponsor            = getSponsor(sponsorDescription, databaseConnection);
+		HashMap<String, Object>  interpreter        = getInterpreter(interpreterShortName, databaseConnection);
+
+		if (sponsor.get(idName) != null) {
+			sponsorId                               = (int)(sponsor.get(idName));
+			sponsorName                             = (String)sponsor.get(sponsorDescriptionName);
+
+			if (sponsorName.matches("^.*\\s\\(.+\\).*$")) {
+				String           pattern            = "^(.*)\\s\\((.+)\\).*$";
+
+				realm                               = getMatchingGroup(sponsorName, pattern, 2);
+				sponsorName                         = getMatchingGroup(sponsorName, pattern, 1);
+			} else {
+				realm = "CFS";
+			}
+
+			sponsorName = sponsorName.replaceAll("\\s", "_");
+		} else {
+			throw new RuntimeException("Could not get sponsor for " + sponsorDescription + ".");
+		}
+
+		if (interpreter.get(idName) != null)
+			interpreterId                               = (int)(interpreter.get(idName));
+		else
+			throw new RuntimeException("Could not get interpreter for " + interpreterShortName + ".");
+
+		if (user.get(idName) != null)
+			userId                                  = (int)(user.get(idName));
+		else
+			throw new RuntimeException("User not found for " + userEmail + ".");
+
+		HashMap<String, Object> dataFile = createDataFile(filename, databaseConnection);
+
+		if (dataFile.get(idName) != null)
+			dataFileId = (int)(dataFile.get(idName));
+		else
+			throw new RuntimeException("Could not create DataFile for " + description + ".");
+
+		HashMap<String, Object> commissionEntry     = createCommissionEntry(sponsorId,
+																		   interpreterId,
+																		   userId,
+																		   dataFileId,
+																		   description,
+																		   processed_at,
+																		   databaseConnection);
+
+		if (commissionEntry.get(idName) != null)
+			commissionEntryId = (int)(commissionEntry.get(idName));
+		else
+			throw new RuntimeException("Could not create Commission Entry for " + description + ".");
+
+		HashMap<String, Object> commissionUpload    = createCommissionUpload( userId, processed_at, commissionEntryId, sponsorDescription, filename, databaseConnection);
+
+		if (commissionUpload.get(idName) != null)
+			commissionUploadId = (int)(commissionUpload.get(idName));
+		else
+			throw new RuntimeException("Could not create Commission Upload for " + description + ".");
+
+		result[sessionSponsorId]                    = (Integer)sponsorId;
+		result[sessionUserId]                       = (Integer)userId;
+		result[sessionDataFileId]                   = (Integer)dataFileId;
+		result[sessionCommissionUploadId]           = (Integer)commissionUploadId;
+		result[sessionCommissionEntryId]            = (Integer)commissionEntryId;
+		result[sessionFilename]                     = filename;
+		result[sessionXtivaAccountFilename]         = outputFolder + "/GENA_" + sponsorName + "_" + realm + "_" +  getFileDateFromFilename(filename, null) + ".TXT";
+		result[sessionXtivaTransactionsFilename]    = outputFolder + "/GENT_" + sponsorName + "_" + realm + "_" +  getFileDateFromFilename(filename, null) + ".TXT";
+		result[sessionOutputFolder]                 = outputFolder;
+
+		if ((outputFolder != null) && generateNormalizedHeader) {
+			String outputFilename = outputFolder + "/" + baseName(filename);
+
+			addNormalizedHeader(outputFilename);
+		}
+
+		return result;
+	}
+
+    public static Object[] setupCommission(String filename,
+    										  String interpreterShortName,
+    										  String sponsorDescription,
+    										  String userEmail,
+    										  java.sql.Connection databaseConnection) throws Exception {
+        return setupCommission(filename, sponsorDescription, interpreterShortName, userEmail, databaseConnection,
+        					   null, false, false);
+    }
+
+    public static java.sql.Connection getConnection(String url, String user, String password) throws SQLException {
+		java.sql.Connection connection = null;
+
+		try {
+			connection = DriverManager.getConnection(url, user, password);
+		} catch (SQLException e) {
+			throw e;
+		}
+
+		return connection;
+	}
+
+	public static java.sql.Connection  getConnection() throws SQLException {
+		return getConnection(developmentDbUrl, developmentDbUser, developmentDbPassword);
+	}
+
+// /home/depositor/bin/execute_unidata_command.sh /raid/live/data/cuso 'PH_CT_PROCESS_DEPOSIT_FILE -USERNAME=PAUL -NO_PASSWORD -PROCESS -RETURN_JSON -FILENAME=cmgcfscommfileout-2018-05-16.csv -DEPOSIT_DATE=06/13/2018 -ACCOUNTING_DATE=06/15/2018 -SPONSOR=3599 -BANK=UNION'
+	
+	public static String buildRemoteCommand(String              filename,
+										   String              realm,
+										   String              sponsorDescription,
+										   java.sql.Connection databaseConnection,
+										   boolean             backOffice,
+										   LocalDateTime       depositDate,
+											LocalDateTime       accountingDate,
+											String              additionalOptions)  throws Exception {
+		DateTimeFormatter       dateTimeFormatter    = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+		LocalDateTime           now                  = LocalDateTime.now();
+		String                  result               = null;
+		String                  sponsor              = null;
+		String                  depositDateString    = null;
+		String                  accountingDateString = null;
+		String                  executeUniData       = null;
+		String                  executeUniDataNoWait = null;
+		String                  processDepositFile   = null;
+		String                  processQueuedFile    = null;
+		String                  getRepsForAccounts   = null;
+		String                  getRepMappings       = null;
+		String                  deleteDepositRecords = null;
+		String                  sshHost              = null;
+		String                  sshUsername          = null;
+		String                  sshPassword          = null;
+		String                  backOfficeUsername   = null;
+		String                  backOfficePassword   = null;
+		String                  accountDirectory     = null;
+		String                  uploadDirectory      = null;
+		String                  defaultBank          = null;
+
+		switch(realm) {
+		case "spf":
+            executeUniData                           = spfExecuteUniData;
+            executeUniDataNoWait                     = spfExecuteUniDataNoWait;
+            processDepositFile                       = spfProcessDepositFile;
+            processQueuedFile                        = spfProcessQueuedFile;
+            getRepsForAccounts                       = spfGetRepsForAccounts;
+            getRepMappings                           = spfGetRepMappings;
+            deleteDepositRecords                     = spfDeleteDepositRecords;
+            sshHost                                  = spfSshHost;
+            sshUsername                              = spfSshUsername;
+            sshPassword                              = spfSshPassword;
+            backOfficeUsername                       = spfBackOfficeUsername;
+            backOfficePassword                       = spfBackOfficePassword;
+            uploadDirectory                          = spfUploadDirectory;
+            defaultBank                              = spfDefaultBank;
+
+            if (backOffice)
+                accountDirectory                     = spfBackOfficeDirectory;
+            else
+                accountDirectory                     = spfFrontOfficeDirectory;
+
+			break;
+
+		default:
+            executeUniData                           = cfsExecuteUniData;
+            executeUniDataNoWait                     = cfsExecuteUniDataNoWait;
+            processDepositFile                       = cfsProcessDepositFile;
+            processQueuedFile                        = cfsProcessQueuedFile;
+            getRepsForAccounts                       = cfsGetRepsForAccounts;
+            getRepMappings                           = cfsGetRepMappings;
+            deleteDepositRecords                     = cfsDeleteDepositRecords;
+            sshHost                                  = cfsSshHost;
+            sshUsername                              = cfsSshUsername;
+            sshPassword                              = cfsSshPassword;
+            backOfficeUsername                       = cfsBackOfficeUsername;
+            backOfficePassword                       = cfsBackOfficePassword;
+            uploadDirectory                          = cfsUploadDirectory;
+            defaultBank                              = cfsDefaultBank;
+
+            if (backOffice)
+                accountDirectory                     = cfsBackOfficeDirectory;
+            else
+                accountDirectory                     = cfsFrontOfficeDirectory;
+		}
+
+		if ((sponsorDescription != null) &&
+			(sponsorDescription != "")) {
+			if (regexIndexOf(sponsorDescription, "^\\d+$") >= 0) {
+				sponsor = sponsorDescription;
+			} else {
+				if (databaseConnection != null) {
+					HashMap<String, Object> info    = getSponsor(sponsorDescription,
+																		  databaseConnection);
+					if (info != null) {
+						sponsor                     = Integer.toString((int)(info.get(sponsorContactIdName)));
+
+					}
+				}
+			}
+		}
+
+		if (depositDate == null)
+            depositDateString                       = dateTimeFormatter.format(now);
+        else
+            depositDateString                       = dateTimeFormatter.format(depositDate);
+
+		if (accountingDate != null)
+            accountingDateString                    = dateTimeFormatter.format(accountingDate);
+        
+		result                                      = executeUniData + " " + accountDirectory +
+				                                      " '" + processDepositFile +
+				                                      " -USERNAME=PAUL -NO_PASSWORD -PROCESS -RETURN_JSON";
+
+		if ((filename != null) && (filename != ""))
+			result                                 += " -FILENAME=" + filename;
+
+		if ((depositDateString != null) && (depositDateString != ""))
+			result                                 += " -DEPOSIT_DATE=" + depositDateString;
+
+		if ((accountingDateString != null) && (accountingDateString != ""))
+			result                                 += " -ACCOUNTING_DATE=" + accountingDateString;
+		else
+			result                                 += " -ACCOUNTING_DATE=";
+			
+		if ((sponsor != null) && (sponsor != ""))
+			result                                 += " --SPONSOR=" + sponsor;
+
+		if ((defaultBank != null) && (defaultBank != ""))
+			result                                 += " --BANK=" + defaultBank;
+
+		if ((additionalOptions != null) && (additionalOptions != ""))
+			result                                 += " " + additionalOptions;
+
+		result                                     += "'";
+
+		return result;
+	}
+
+	public static String buildRemoteCommand(String filename)  throws Exception {
+		return buildRemoteCommand(filename, "cfs", null, null, true, null, null, null);
+	}
+
+	public static String buildRemoteCommand(String filename,
+											String realm)  throws Exception {
+		return buildRemoteCommand(filename, realm, null, null, true, null, null, null);
+	}
+
+	public static String buildRemoteCommand(String              filename,
+											String              realm,
+											String              sponsorDescription,
+											java.sql.Connection databaseConnection)  throws Exception {
+		return buildRemoteCommand(filename, realm, sponsorDescription, databaseConnection, true, null, null, null);
+	}
+
+	public static String buildRemoteCommand(String              filename,
+											String              realm,
+											String              sponsorDescription,
+											java.sql.Connection databaseConnection,
+											boolean             backOffice)  throws Exception {
+		return buildRemoteCommand(filename, realm, sponsorDescription, databaseConnection, backOffice, null, null, null);
+	}
+
+	public static Boolean finishCommission(java.util.Map<String, Object> globalMap,
+										   String                       classicResult,
+										   int                          commissionEntryId,
+										   int                          commissionUploadId,
+										   java.sql.Connection          databaseConnection) throws Exception {
+		boolean           result                = false;
+		JSONObject        jsonObject            = new JSONObject(classicResult);
+		int               status                = jsonObject.getInt("status");
+		String            errorMessage          = jsonObject.getString("error_message");
+		int               sponsorId             = jsonObject.getInt("sponsor_id");
+		int               statusId              = jsonObject.getInt("status_id");
+		int               depositId             = jsonObject.getInt("deposit_id");
+		int               session               = jsonObject.getInt("session");
+		String            depositDateString     = jsonObject.getString("deposit_date");
+		String            accountingDateString  = jsonObject.getString("accounting_date");
+		double            checkAmount           = jsonObject.getDouble("check_amount");
+		JSONArray         badRepsArray          = jsonObject.getJSONArray("bad_reps");
+		JSONArray         badRepAccountsArray   = jsonObject.getJSONArray("bad_rep_accounts");
+		JSONArray         newRepCodesArray      = jsonObject.getJSONArray("new_rep_codes");
+		String            filename              = (String)globalMap.get("sessionFilename");
+		BigDecimal        grandTotal            = (BigDecimal)globalMap.get("sessionGrandTotal");
+		BigDecimal        totalCredits          = (BigDecimal)globalMap.get("sessionCreditsTotal");
+		BigDecimal        totalDebits           = (BigDecimal)globalMap.get("sessionDebitsTotal");
+		int               totalEntries          = (int)globalMap.get("sessionEntries");
+		int               creditEntries         = (int)globalMap.get("sessionCreditEntries");
+		int               debitEntries          = (int)globalMap.get("sessionDebitEntries");
+		String            processStatus         = null;
+		String            updateStatement       = null;
+		String [][]       badReps               = null;
+		java.sql.Date     fileDate              = null;
+		java.sql.Date     depositDate           = null;
+		java.sql.Date     uploadDate            = null;
+		java.sql.Date     accountingDate        = null;
+		PreparedStatement preparedStatement;
+		ResultSet          resultSet;
+
+		if (regexIndexOf(depositDateString, "^\\d\\d\\-\\d\\d\\-\\d\\d\\d\\d$") >= 0) {
+			String [] fields                    = depositDateString.split("\\-");
+
+			depositDate                         = java.sql.Date.valueOf(fields[2] + "-" + fields[0] + "-" + fields[1]);
+		}
+
+		if (regexIndexOf(accountingDateString, "^\\d\\d\\-\\d\\d\\-\\d\\d\\d\\d$") >= 0) {
+			String [] fields                    = accountingDateString.split("\\-");
+
+			accountingDate                      = java.sql.Date.valueOf(fields[2] + "-" + fields[0] + "-" + fields[1]);
+		}
+
+		if (badRepsArray.length() > 0) {
+			badReps = new String[badRepsArray.length()][3];
+
+			for (int i = 0; i < badRepsArray.length(); i++) {
+				badReps[i][0]                   = badRepsArray.getString(i);
+				badReps[i][1]                   = newRepCodesArray.getString(i);
+				badReps[i][2]                   = badRepAccountsArray.getString(i);
+			}
+		}
+
+		if (status == 4)
+			processStatus                       = "success";
+		else
+			processStatus                       = "error";
+
+		updateStatement                         = "UPDATE commission_uploads SET session=?, deposit_date=?, accounting_date=?, grand_total=?, check_amount=?, status=?, error_message=? WHERE id=? RETURNING upload_date";
+		preparedStatement                       = databaseConnection.prepareStatement(updateStatement);
+
+		preparedStatement.setInt(1,             session);
+		preparedStatement.setDate(2,            depositDate);
+		preparedStatement.setDate(3,            accountingDate);
+		preparedStatement.setBigDecimal(4,      grandTotal);
+		preparedStatement.setBigDecimal(5,      new BigDecimal(checkAmount));
+		preparedStatement.setString(6,          processStatus);
+		preparedStatement.setString(7,          errorMessage);
+		preparedStatement.setInt(8,             commissionUploadId);
+		preparedStatement.execute();
+
+		resultSet                               = preparedStatement.getResultSet();
+
+		resultSet.next();
+
+		uploadDate                              = resultSet.getDate(1);
+
+		if (filename != null) {
+			filename = baseName(filename);
+			fileDate = getFileDateFromFilename(filename, uploadDate);
+		}
+
+		if (status == 4)
+			processStatus                       = "Processed";
+		else
+			processStatus                       = "Error";
+
+		updateStatement                         = "UPDATE commission_entries SET grand_total=?, total_credits=?, total_debits=?, total_entries=?, credit_entries=?, debit_entries=?, status=?, file_record_count=?, session=?, check_amount=?, file_date=?, deposit_date=?, upload_date=?, accounting_date=? WHERE id=?";
+        preparedStatement                       = databaseConnection.prepareStatement(updateStatement);
+
+		preparedStatement.setBigDecimal(1,      grandTotal);
+		preparedStatement.setBigDecimal(2,      totalCredits);
+		preparedStatement.setBigDecimal(3,      totalDebits);
+		preparedStatement.setInt(4,             totalEntries);
+		preparedStatement.setInt(5,             creditEntries);
+		preparedStatement.setInt(6,             debitEntries);
+		preparedStatement.setString(7,          processStatus);
+		preparedStatement.setInt(8,             totalEntries);
+		preparedStatement.setInt(9,             session);
+		preparedStatement.setBigDecimal(10,     new BigDecimal(checkAmount));
+		preparedStatement.setDate(11,           fileDate);
+		preparedStatement.setDate(12,           depositDate);
+		preparedStatement.setDate(13,           uploadDate);
+		preparedStatement.setDate(14,           accountingDate);
+		preparedStatement.setInt(15,            commissionEntryId);
+		preparedStatement.executeUpdate();
+
+		result                                  = true;
+
+		return result;
+	}
+}
