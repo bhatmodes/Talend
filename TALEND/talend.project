@@ -471,4 +471,5 @@
     <migrationTask xmi:id="_QuWOzX4_EeiEL6WABw9NIw" id="org.talend.repository.model.migration.AutoUpdateRelationsMigrationTask" breaks="5.1.1" version="5.1.2" status="noimpact"/>
   </TalendProperties:Project>
   <TalendProperties:User xmi:id="_PcsZQn4_EeiEL6WABw9NIw" login="bhatmodes@company.com" firstName="shivanand" lastName="bhatmode" type="DQ" additionnalData="{}"/>
+  <TalendProperties:User xmi:id="_xsIukH7CEeitpueSm8_gWw" login="nataraj.kesana@synechron.com" firstName="nataraj" lastName="kesana" type="DQ" additionnalData="{}"/>
 </xmi:XMI>
