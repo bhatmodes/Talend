@@ -551,7 +551,7 @@
       <column comment="" key="false" length="6" name="Rep_Code" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_String" usefulColumn="true"/>
       <column comment="" key="false" length="41" name="Registration_Name" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_String" usefulColumn="true"/>
       <column comment="" key="false" length="36" name="Client_Name" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_String" usefulColumn="true"/>
-      <column comment="" key="false" length="9" name="Tax_Id" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_Integer" usefulColumn="true"/>
+      <column comment="" key="false" length="9" name="Tax_Id" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_String" usefulColumn="true"/>
       <column comment="" key="false" length="2" name="State" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_String" usefulColumn="true"/>
       <column comment="" key="false" length="10" name="Account_Number" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_String" usefulColumn="true"/>
       <column comment="" key="false" length="28" name="Inception_Date" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_String" usefulColumn="true"/>
@@ -561,11 +561,11 @@
       <column comment="" key="false" length="19" name="Manager_Name" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_String" usefulColumn="true"/>
       <column comment="" key="false" length="28" name="Payout_Date" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_String" usefulColumn="true"/>
       <column comment="" key="false" length="28" name="Quarter_End_Date" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_String" usefulColumn="true"/>
-      <column comment="" key="false" length="9" name="Account_Market_Value" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="3" type="id_Float" usefulColumn="true"/>
-      <column comment="" key="false" length="2" name="Period_Days" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_Integer" usefulColumn="true"/>
+      <column comment="" key="false" length="9" name="Account_Market_Value" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="3" type="id_String" usefulColumn="true"/>
+      <column comment="" key="false" length="2" name="Period_Days" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_String" usefulColumn="true"/>
       <column comment="" key="false" length="4" name="Comment" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_String" usefulColumn="true"/>
-      <column comment="" key="false" length="7" name="Payout_Total" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="3" type="id_Double" usefulColumn="true"/>
-      <column comment="" key="false" length="17" name="BPS" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="13" type="id_Double" usefulColumn="true"/>
+      <column comment="" key="false" length="7" name="Payout_Total" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="3" type="id_String" usefulColumn="true"/>
+      <column comment="" key="false" length="17" name="BPS" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="13" type="id_String" usefulColumn="true"/>
       <column comment="" key="false" length="-1" name="broker_dealer_id" nullable="false" originalLength="-1" pattern="" precision="-1" sourceType="" type="id_String" usefulColumn="true"/>
       <column comment="" key="false" length="-1" name="rep_name" nullable="false" originalLength="-1" pattern="" precision="-1" sourceType="" type="id_String" usefulColumn="true"/>
       <column comment="" key="false" length="-1" name="commission_amount" nullable="false" originalLength="-1" pattern="" precision="-1" sourceType="" type="id_Float" usefulColumn="true"/>
@@ -587,7 +587,7 @@
         <mapperTableEntries expression="row1.Rep_Code " name="Rep_Code" nullable="true" type="id_String"/>
         <mapperTableEntries expression="row1.Registration_Name " name="Registration_Name" nullable="true" type="id_String"/>
         <mapperTableEntries expression="row1.Client_Name " name="Client_Name" nullable="true" type="id_String"/>
-        <mapperTableEntries expression="row1.Tax_Id " name="Tax_Id" nullable="true" type="id_Integer"/>
+        <mapperTableEntries expression="row1.Tax_Id " name="Tax_Id" nullable="true" type="id_String"/>
         <mapperTableEntries expression="row1.State " name="State" nullable="true" type="id_String"/>
         <mapperTableEntries expression="row1.Account_Number " name="Account_Number" nullable="true" type="id_String"/>
         <mapperTableEntries expression="row1.Inception_Date " name="Inception_Date" nullable="true" type="id_String"/>
@@ -597,11 +597,11 @@
         <mapperTableEntries expression="row1.Manager_Name " name="Manager_Name" nullable="true" type="id_String"/>
         <mapperTableEntries expression="row1.Payout_Date " name="Payout_Date" nullable="true" type="id_String"/>
         <mapperTableEntries expression="row1.Quarter_End_Date " name="Quarter_End_Date" nullable="true" type="id_String"/>
-        <mapperTableEntries expression="row1.Account_Market_Value " name="Account_Market_Value" nullable="true" type="id_Float"/>
-        <mapperTableEntries expression="row1.Period_Days " name="Period_Days" nullable="true" type="id_Integer"/>
+        <mapperTableEntries expression="row1.Account_Market_Value " name="Account_Market_Value" nullable="true" type="id_String"/>
+        <mapperTableEntries expression="row1.Period_Days " name="Period_Days" nullable="true" type="id_String"/>
         <mapperTableEntries expression="row1.Comment " name="Comment" nullable="true" type="id_String"/>
-        <mapperTableEntries expression="row1.Payout_Total " name="Payout_Total" nullable="true" type="id_Double"/>
-        <mapperTableEntries expression="row1.BPS " name="BPS" nullable="true" type="id_Double"/>
+        <mapperTableEntries expression="row1.Payout_Total " name="Payout_Total" nullable="true" type="id_String"/>
+        <mapperTableEntries expression="row1.BPS " name="BPS" nullable="true" type="id_String"/>
         <mapperTableEntries expression="Var.broker_dealer_id " name="broker_dealer_id" type="id_String"/>
         <mapperTableEntries expression="Var.rep_name " name="rep_name" type="id_String"/>
         <mapperTableEntries expression="Var.commission_amount " name="commission_amount" type="id_Float"/>
@@ -899,7 +899,7 @@
       <column comment="" key="false" length="6" name="Rep_Code" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_String" usefulColumn="true"/>
       <column comment="" key="false" length="41" name="Registration_Name" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_String" usefulColumn="true"/>
       <column comment="" key="false" length="36" name="Client_Name" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_String" usefulColumn="true"/>
-      <column comment="" key="false" length="9" name="Tax_Id" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_Integer" usefulColumn="true"/>
+      <column comment="" key="false" length="9" name="Tax_Id" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_String" usefulColumn="true"/>
       <column comment="" key="false" length="2" name="State" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_String" usefulColumn="true"/>
       <column comment="" key="false" length="10" name="Account_Number" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_String" usefulColumn="true"/>
       <column comment="" key="false" length="28" name="Inception_Date" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_String" usefulColumn="true"/>
@@ -909,11 +909,11 @@
       <column comment="" key="false" length="19" name="Manager_Name" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_String" usefulColumn="true"/>
       <column comment="" key="false" length="28" name="Payout_Date" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_String" usefulColumn="true"/>
       <column comment="" key="false" length="28" name="Quarter_End_Date" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_String" usefulColumn="true"/>
-      <column comment="" key="false" length="9" name="Account_Market_Value" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="3" type="id_Float" usefulColumn="true"/>
-      <column comment="" key="false" length="2" name="Period_Days" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_Integer" usefulColumn="true"/>
+      <column comment="" key="false" length="9" name="Account_Market_Value" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="3" type="id_String" usefulColumn="true"/>
+      <column comment="" key="false" length="2" name="Period_Days" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_String" usefulColumn="true"/>
       <column comment="" key="false" length="4" name="Comment" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="0" type="id_String" usefulColumn="true"/>
-      <column comment="" key="false" length="7" name="Payout_Total" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="3" type="id_Double" usefulColumn="true"/>
-      <column comment="" key="false" length="17" name="BPS" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="13" type="id_Double" usefulColumn="true"/>
+      <column comment="" key="false" length="7" name="Payout_Total" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="3" type="id_String" usefulColumn="true"/>
+      <column comment="" key="false" length="17" name="BPS" nullable="true" pattern="&quot;dd-MM-yyyy&quot;" precision="13" type="id_String" usefulColumn="true"/>
       <column comment="" key="false" length="-1" name="broker_dealer_id" nullable="false" originalLength="-1" pattern="" precision="-1" sourceType="" type="id_String" usefulColumn="true"/>
       <column comment="" key="false" length="-1" name="rep_name" nullable="false" originalLength="-1" pattern="" precision="-1" sourceType="" type="id_String" usefulColumn="true"/>
       <column comment="" key="false" length="-1" name="commission_amount" nullable="false" originalLength="-1" pattern="" precision="-1" sourceType="" type="id_Float" usefulColumn="true"/>
@@ -945,13 +945,13 @@
     <elementParameter field="COLOR" name="SUBJOB_TITLE_COLOR" show="false" value="92;131;150"/>
     <elementParameter field="COLOR" name="SUBJOB_COLOR" value="207;226;236"/>
   </subjob>
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#" Id="_c5bd1690-cfe6-4a50-bd7b-e2c38a1177b2"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha512"/><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"/><DigestValue>9/POo1gjv5w9q7jhzCSkGnBcs9FuyExn7OiL+J1Il41zvTahDL3VWNroRQ8hagvWbo03+mY3FsU9
-k9QMApHgCw==</DigestValue></Reference><Reference Type="http://www.w3.org/2000/09/xmldsig#SignatureProperties" URI="#_de4c4310-4c1a-40fd-889d-6986de552c16"><Transforms><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"/><DigestValue>81HmjFpDRv3A6xGWJ2gEeQGBDBhmweyrX4A/WvUriasq4bccEwG2FM05jaY9fvO3h5uLTXDob5CO
-h3pzzWEDig==</DigestValue></Reference></SignedInfo><SignatureValue>LHp4cEqF7qpUm0lwDHOspCIaTVn8WZ7Jdji4x6+qwkcxsF2obmc/VS2R4O+6Lxb3AccW6CcfQwws
-/HHknoNMOAnOylbwpoY4wA1IuBEWNOrOkcuwxUCNzWcJOuZGjqRYUob6yL6u8xXbsCZ7Dg/YY3N3
-FNWO0vnu5Ng5LtD1aN8+Ch6vD/PiXTNW8Uw2lslfl3XEwcXM2NP2Ka+vp0bQA3hTpI347yKDnAre
-HY7PZvDXgmgW4JlaNmAsE3fvqKUgYOLPDh7WeO38esMsS7NXQIgO/9s+BA2j6Zzu3UA/3P+6xayx
-KsRCLQ/xUoVWlTRAmKGu+/WJl9nsdPPTC2+vaA==</SignatureValue><KeyInfo><X509Data><X509SubjectName>CN=Default code-signing certificate,OU=R&amp;D,O=Talend Inc.,ST=Paris,C=FR</X509SubjectName><X509Certificate>MIIFYzCCA0ugAwIBAgIBATANBgkqhkiG9w0BAQsFADCBjTELMAkGA1UEBhMCRlIxDjAMBgNVBAgM
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#" Id="_c58bfdf6-c2af-4b25-a7da-4648adc7a297"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha512"/><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"/><DigestValue>yvknr8DYrF3fFrjM1BBasO9Zym1K04wUtgvhW5/kQKQm2nQBcpIFF8bej64T3U0Sf0pxcblIDRk3
+k94Q3XG+LA==</DigestValue></Reference><Reference Type="http://www.w3.org/2000/09/xmldsig#SignatureProperties" URI="#_97423a5d-e564-4425-9858-d504b3db5ebf"><Transforms><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"/><DigestValue>5jopxg4R+Au7h8VEd5HXK1Msflz5+eUcAYvpk/Pg1qsQh9inN9EGYX96/jrazxlswpkkPD6UTmt2
+0I9JhI6mlg==</DigestValue></Reference></SignedInfo><SignatureValue>1E1bqYV/ZyXuG6PINOAcpX1JM3IhB5LlQ2MBgOxPUPh8W67xqXq6BW3WgJYrr1jvlxV4egt9VkcP
+T+n9lZ6b0MOUC9i+0qhlzMRNvyaAE0W3WsTD3LpegRdWfk2udBm1VfJTftJh9CfiZeDHC6J7XyiE
+ntnMLpJxySwR8UiujaekKd5HPNHc0UXsT+33khJAFbd2VrKzPuwG68+pkJkrhY1ukGtOnvnZwjqB
+TacYyp21j/0LdsMT/Mio2MRktzknqA5t3ALgBgOMaXDt7f/RLHTxt8wX+GsN8E2Hb614nYNVJOir
+ifmb4kBdE68RaDKa8MVPxupeBg7/snuHpCAjkg==</SignatureValue><KeyInfo><X509Data><X509SubjectName>CN=Default code-signing certificate,OU=R&amp;D,O=Talend Inc.,ST=Paris,C=FR</X509SubjectName><X509Certificate>MIIFYzCCA0ugAwIBAgIBATANBgkqhkiG9w0BAQsFADCBjTELMAkGA1UEBhMCRlIxDjAMBgNVBAgM
 BVBhcmlzMQ4wDAYDVQQHDAVQYXJpczEUMBIGA1UECgwLVGFsZW5kIEluYy4xDDAKBgNVBAsMA1Im
 RDEWMBQGA1UEAwwNVGFsZW5kIFImRCBDQTEiMCAGCSqGSIb3DQEJARYTc2VjdXJpdHlAdGFsZW5k
 LmNvbTAeFw0xODAxMTgwMDA2MTJaFw0yMTAxMTcwMDA2MTJaMGwxCzAJBgNVBAYTAkZSMQ4wDAYD
@@ -975,4 +975,4 @@ r3/fbKJ02Ni9kCnkY8wQS1yn45UNl1woSjryza4f4uLKGkrrIsUPXK+Vy4A1Il8XgFfmrtgA8m9s
 EHyu0OyAJH/agWN+GLhF/ssp26oXhiYqTkG4sQtNRFQG0isaYf/JWSt3f8Q+7/pnZpz4mfEAFimI
 BBLzRwDA6x9qqOn0RXxBo9pH16EO3SXPLR64cJum8B/RI/i8H6OkQDO1tEiE6UeceZk++U7fnD3c
 6i9Km85GTgQi6REsVZGIL/tZNIzN//qPwi7cDo3Cf/xmPrIKQhHJaxCqmbjGDmC8AXOaqNfWotVX
-Wy2dcglW62PDszE/HKh9</X509Certificate></X509Data></KeyInfo><Object><SignatureProperties><SignatureProperty Id="_de4c4310-4c1a-40fd-889d-6986de552c16" Target="#_c5bd1690-cfe6-4a50-bd7b-e2c38a1177b2"><Timestamp>2018-07-05 12:15:07</Timestamp></SignatureProperty></SignatureProperties></Object></Signature></talendfile:ProcessType>
+Wy2dcglW62PDszE/HKh9</X509Certificate></X509Data></KeyInfo><Object><SignatureProperties><SignatureProperty Id="_97423a5d-e564-4425-9858-d504b3db5ebf" Target="#_c58bfdf6-c2af-4b25-a7da-4648adc7a297"><Timestamp>2018-07-05 12:15:49</Timestamp></SignatureProperty></SignatureProperties></Object></Signature></talendfile:ProcessType>
