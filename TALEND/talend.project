@@ -140,7 +140,6 @@
     </ItemsRelations>
     <ItemsRelations xmi:id="_C179cIBKEeiEMKWABw9NIw">
       <baseItem xmi:id="_C179cYBKEeiEMKWABw9NIw" id="__AHicIBJEeiEMKWABw9NIw" version="0.1" type="job"/>
-      <relatedItems xmi:id="_C179coBKEeiEMKWABw9NIw" id="_6SWy0IBJEeiEMKWABw9NIw" version="Latest" type="property"/>
       <relatedItems xmi:id="_C179c4BKEeiEMKWABw9NIw" id="SQLike" version="Latest" type="routine"/>
       <relatedItems xmi:id="_C179dIBKEeiEMKWABw9NIw" id="Numeric" version="Latest" type="routine"/>
       <relatedItems xmi:id="_C179dYBKEeiEMKWABw9NIw" id="TalendString" version="Latest" type="routine"/>
