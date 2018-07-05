@@ -14,6 +14,7 @@
     <module>jobs/process/cuna_commissions_1.0</module>
     <module>jobs/process/Atria/atria_1.1</module>
     <module>jobs/process/testserver_0.1</module>
+    <module>jobs/process/Atria/brinkercapital_file_load_0.1</module>
   </modules>
   <properties>
     <talend.project.name>TALEND</talend.project.name>
